@@ -8,7 +8,7 @@ require 'http/parser'
 module Rack
   module Handler
     class Client
-      def self.run(app, options = nil)
+      def self.run(app, options = {})
 	host = options[:host] || "localhost"
 	port = options[:port] || 8080
 	sock = TCPSocket.open(host, port)
@@ -21,12 +21,11 @@ module Rack
 
         env[SCRIPT_NAME] = ""  if env[SCRIPT_NAME] == "/"
 	parser = Http::Parser.new
-	parser.on_headers_complete = proc{ :stop }
 	input = Rack::RewindableInput.new(sock)
 	while true do
 	  line = input.gets
 	  break if line.nil?
-	  parser << line
+	  parser.parse line
 	  break if line.chomp.size == 0
 	end
         env.update(
@@ -41,7 +40,7 @@ module Rack
 
         env[QUERY_STRING] ||= ""
         env[HTTP_VERSION] ||= env[SERVER_PROTOCOL]
-        env[REQUEST_PATH] ||= parser.request_url
+        env[REQUEST_PATH] ||= parser.path
 
         status, headers, body = app.call(env)
         begin
