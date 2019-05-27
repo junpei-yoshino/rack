@@ -54,7 +54,7 @@ module Rack
       elsif ENV.include?("RACK_HANDLER")
         self.get(ENV["RACK_HANDLER"])
       else
-        pick ['puma', 'thin', 'falcon', 'webrick']
+        pick ['puma', 'thin', 'falcon', 'webrick','client']
       end
     end
 
@@ -90,6 +90,7 @@ module Rack
     autoload :LSWS, "rack/handler/lsws"
     autoload :SCGI, "rack/handler/scgi"
     autoload :Thin, "rack/handler/thin"
+    autoload :Client, "rack/handler/client"
 
     register 'cgi', 'Rack::Handler::CGI'
     register 'fastcgi', 'Rack::Handler::FastCGI'
@@ -97,5 +98,6 @@ module Rack
     register 'lsws', 'Rack::Handler::LSWS'
     register 'scgi', 'Rack::Handler::SCGI'
     register 'thin', 'Rack::Handler::Thin'
+    register 'client', 'Rack::Handler::Client'
   end
 end

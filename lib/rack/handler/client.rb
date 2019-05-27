@@ -3,6 +3,7 @@
 require 'socket'
 require 'rack/content_length'
 require 'rack/rewindable_input'
+require 'http/parser'
 
 module Rack
   module Handler
@@ -19,10 +20,18 @@ module Rack
         env.delete "HTTP_CONTENT_LENGTH"
 
         env[SCRIPT_NAME] = ""  if env[SCRIPT_NAME] == "/"
-
+	parser = Http::Parser.new
+	parser.on_headers_complete = proc{ :stop }
+	input = Rack::RewindableInput.new(sock)
+	while true do
+	  line = input.gets
+	  break if line.nil?
+	  parser << line
+	  break if line.chomp.size == 0
+	end
         env.update(
           RACK_VERSION      => Rack::VERSION,
-          RACK_INPUT        => Rack::RewindableInput.new(sock),
+          RACK_INPUT        => input,
           RACK_ERRORS       => STDERR,
           RACK_MULTITHREAD  => false,
           RACK_MULTIPROCESS => true,
@@ -32,7 +41,7 @@ module Rack
 
         env[QUERY_STRING] ||= ""
         env[HTTP_VERSION] ||= env[SERVER_PROTOCOL]
-        env[REQUEST_PATH] ||= "/"
+        env[REQUEST_PATH] ||= parser.request_url
 
         status, headers, body = app.call(env)
         begin
