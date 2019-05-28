@@ -34,11 +34,11 @@ module Rack
           RACK_ERRORS       => STDERR,
           RACK_MULTITHREAD  => false,
           RACK_MULTIPROCESS => true,
-          RACK_RUNONCE      => true,
+          RACK_RUNONCE      => false,
           RACK_URL_SCHEME   => ["yes", "on", "1"].include?(ENV[HTTPS]) ? "https" : "http"
         )
-
-        env[QUERY_STRING] ||= ""
+	env[METHOD] = parser.method
+        env[QUERY_STRING] ||= parser.query_string
         env[HTTP_VERSION] ||= env[SERVER_PROTOCOL]
         env[REQUEST_PATH] ||= parser.path
 
