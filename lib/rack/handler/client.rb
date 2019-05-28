@@ -37,8 +37,8 @@ module Rack
           RACK_RUNONCE      => false,
           RACK_URL_SCHEME   => ["yes", "on", "1"].include?(ENV[HTTPS]) ? "https" : "http"
         )
-	env[REQUEST_METHOD] = parser.method
-        env[QUERY_STRING] ||= parser.query_string
+	env[REQUEST_METHOD] = parser.http_method
+        env[QUERY_STRING] ||= parser.query
         env[HTTP_VERSION] ||= env[SERVER_PROTOCOL]
         env[REQUEST_PATH] ||= parser.path
 
